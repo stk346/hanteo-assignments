@@ -36,6 +36,9 @@ public class UserInterface {
                 searchCategory();
                 return true;
             case 2:
+                addCategory();
+                return true;
+            case 3:
                 return false;
             default:
                 System.out.println("잘못된 명령입니다.");
@@ -46,7 +49,8 @@ public class UserInterface {
     private void displayMainMenu() {
         System.out.println("\n=== 카테고리 관리 시스템 ===");
         System.out.println("1. 카테고리 검색");
-        System.out.println("2. 종료");
+        System.out.println("2. 카테고리 추가");
+        System.out.println("3. 종료");
         System.out.print("명령을 입력하세요: ");
     }
     
@@ -89,5 +93,52 @@ public class UserInterface {
         scanner.nextLine(); // 버퍼 비우기
         
         ResultDisplayer.displayResult(format, searchResults, tree);
+    }
+
+    private void addCategory() {
+        System.out.println("\n=== 카테고리 추가 ===");
+        
+        // 카테고리 이름 입력
+        System.out.println("추가할 카테고리 이름을 입력하세요:");
+        String categoryName = scanner.nextLine().trim();
+        if (categoryName.isEmpty()) {
+            System.out.println("카테고리 이름은 비워둘 수 없습니다.");
+            return;
+        }
+
+        // 상위 카테고리 ID 입력
+        System.out.println("상위 카테고리 ID를 입력하세요 (최상위 카테고리는 엔터):");
+        String parentIdInput = scanner.nextLine().trim();
+        
+        try {
+            Category newCategory;
+            if (parentIdInput.isEmpty()) {
+                // 최상위 카테고리 추가
+                newCategory = tree.addNewCategory(categoryName);
+            } else {
+                // 하위 카테고리 추가
+                int parentId = Integer.parseInt(parentIdInput);
+                
+                // 부모 카테고리 존재 여부 확인
+                if (!tree.categoryPkMapContainsKey(parentId)) {
+                    System.out.println("존재하지 않는 상위 카테고리입니다.");
+                    return;
+                }
+                
+                newCategory = tree.addNewCategory(parentId, categoryName);
+            }
+            
+            // 추가된 카테고리 정보 출력
+            System.out.println("카테고리 이름: " + newCategory.getName());
+            Integer parentId = tree.getParentId(newCategory.getPk());
+            if (parentId != null) {
+                System.out.println("상위 카테고리: " + tree.getCategoryName(parentId) + " (ID: " + parentId + ")");
+            }
+            
+        } catch (NumberFormatException e) {
+            System.out.println("올바른 카테고리 ID를 입력해주세요.");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
     }
 } 
