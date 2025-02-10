@@ -4,8 +4,8 @@ public class TreeInitializer {
     
     public static void init(TreeStructure tree) {
         // 최상위 카테고리 생성
-        Category menCategory = tree.addNewCategory("남자");
-        Category womenCategory = tree.addNewCategory("여자");
+        Category menCategory = tree.addNewCategory(null, "남자");
+        Category womenCategory = tree.addNewCategory(null, "여자");
         
         // 남자 카테고리 하위 구조
         Category exoCategory = tree.addNewCategory(menCategory.getPk(), "엑소");

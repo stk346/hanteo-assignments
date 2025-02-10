@@ -12,14 +12,14 @@ public class TreeStructure {
     private final List<Board> boards = new ArrayList<>();
     private final Map<Integer, Integer> categoryToBoardMap = new HashMap<>();
 
-    public Category addNewCategory(String name) {
-        return addNewCategory(null, name);
-    }
-
     public Category addNewCategory(Integer parentId, String name) {
         Category category = new Category(name);
-        categoryNameMap.put(name + "_" + category.getPk(), category);  // 내부적으로는 구분을 위해 pk를 포함
+        categoryNameMap.put(name + "_" + category.getPk(), category);
         categoryPkMap.put(category.getPk(), category);
+
+        if (parentId != null) {
+            validateCategoryExists(parentId);
+        }
         edges.add(new Edge(parentId, category.getPk()));
         return category;
     }
@@ -108,9 +108,10 @@ public class TreeStructure {
     }
 
     public Board createAndAssignBoard(String boardName, Integer categoryId) {
-        if (!isLeafCategory(categoryId)) {
-            throw new IllegalArgumentException("게시판은 말단 카테고리에만 추가할 수 있습니다.");
-        }
+        validateCategoryExists(categoryId);
+        validateIsLeafCategory(categoryId);
+        validateBoardNotExists(categoryId);
+        validateBoardName(boardName);
         
         Board board = addNewBoard(boardName);
         assignBoardToCategory(categoryId, board.getPk());
@@ -119,13 +120,50 @@ public class TreeStructure {
 
     public void assignExistingBoard(Integer categoryId, Integer boardPk) {
         if (!isLeafCategory(categoryId)) {
-            throw new IllegalArgumentException("게시판은 말단 카테고리에만 추가할 수 있습니다.");
+            throw new IllegalArgumentException("말단 카테고리에만 추가할 수 있습니다.");
         }
         
         if (boardPk > boards.size() || boardPk < 1) {
-            throw new IllegalArgumentException("존재하지 않는 게시판입니다: " + boardPk);
+            throw new IllegalArgumentException("게시판이 존재하지 않습니다.");
         }
         
         categoryToBoardMap.put(categoryId, boardPk);
+    }
+
+    public void deleteBoard(Integer categoryId) {
+        validateCategoryExists(categoryId);
+        validateBoardExists(categoryId);
+        
+        categoryToBoardMap.remove(categoryId);
+    }
+
+    private void validateCategoryExists(Integer categoryId) {
+        if (!categoryPkMapContainsKey(categoryId)) {
+            throw new IllegalArgumentException("존재하지 않는 카테고리입니다.");
+        }
+    }
+
+    private void validateIsLeafCategory(Integer categoryId) {
+        if (!isLeafCategory(categoryId)) {
+            throw new IllegalArgumentException("말단 카테고리에만 추가할 수 있습니다.");
+        }
+    }
+
+    private void validateBoardNotExists(Integer categoryId) {
+        if (categoryToBoardMapContainsKey(categoryId)) {
+            throw new IllegalArgumentException("게시판이 존재합니다.");
+        }
+    }
+
+    private void validateBoardExists(Integer categoryId) {
+        if (!categoryToBoardMapContainsKey(categoryId)) {
+            throw new IllegalArgumentException("게시판이 존재하지 않습니다.");
+        }
+    }
+
+    private void validateBoardName(String boardName) {
+        if (boardName == null || boardName.trim().isEmpty()) {
+            throw new IllegalArgumentException("게시판 이름을 입력해주세요.");
+        }
     }
 }

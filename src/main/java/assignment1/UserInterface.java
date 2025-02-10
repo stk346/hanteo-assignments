@@ -10,7 +10,7 @@ public class UserInterface {
         this.scanner = scanner;
         this.tree = tree;
     }
-    
+
     public void start() {
         while (true) {
             try {
@@ -26,7 +26,7 @@ public class UserInterface {
         scanner.close();
         System.out.println("프로그램을 종료합니다.");
     }
-    
+
     private boolean processOneIteration() {
         displayMainMenu();
         int command = getCommand();
@@ -39,21 +39,29 @@ public class UserInterface {
                 addCategory();
                 return true;
             case 3:
+                addBoard();
+                return true;
+            case 4:
+                deleteBoard();
+                return true;
+            case 5:
                 return false;
             default:
                 System.out.println("잘못된 명령입니다.");
                 return true;
         }
     }
-    
+
     private void displayMainMenu() {
         System.out.println("\n=== 카테고리 관리 시스템 ===");
         System.out.println("1. 카테고리 검색");
         System.out.println("2. 카테고리 추가");
-        System.out.println("3. 종료");
+        System.out.println("3. 게시판 추가");
+        System.out.println("4. 게시판 삭제");
+        System.out.println("5. 종료");
         System.out.print("명령을 입력하세요: ");
     }
-    
+
     private int getCommand() {
         int command = scanner.nextInt();
         scanner.nextLine(); // 버퍼 비우기
@@ -98,42 +106,53 @@ public class UserInterface {
     private void addCategory() {
         System.out.println("\n=== 카테고리 추가 ===");
         
-        // 카테고리 이름 입력
-        System.out.println("추가할 카테고리 이름을 입력하세요:");
-        String categoryName = scanner.nextLine().trim();
-        if (categoryName.isEmpty()) {
-            System.out.println("카테고리 이름은 비워둘 수 없습니다.");
-            return;
-        }
-
-        // 상위 카테고리 ID 입력
-        System.out.println("상위 카테고리 ID를 입력하세요 (최상위 카테고리는 엔터):");
-        String parentIdInput = scanner.nextLine().trim();
-        
         try {
-            Category newCategory;
+            System.out.println("카테고리 이름을 입력하세요:");
+            String categoryName = scanner.nextLine().trim();
+            
+            System.out.println("상위 카테고리 ID를 입력하세요 (최상위 카테고리는 엔터):");
+            String parentIdInput = scanner.nextLine().trim();
+            
             if (parentIdInput.isEmpty()) {
-                // 최상위 카테고리 추가
-                newCategory = tree.addNewCategory(categoryName);
+                tree.addNewCategory(null, categoryName);
             } else {
-                // 하위 카테고리 추가
-                int parentId = Integer.parseInt(parentIdInput);
-                
-                // 부모 카테고리 존재 여부 확인
-                if (!tree.categoryPkMapContainsKey(parentId)) {
-                    System.out.println("존재하지 않는 상위 카테고리입니다.");
-                    return;
-                }
-                
-                newCategory = tree.addNewCategory(parentId, categoryName);
+                tree.addNewCategory(Integer.parseInt(parentIdInput), categoryName);
             }
             
-            // 추가된 카테고리 정보 출력
-            System.out.println("카테고리 이름: " + newCategory.getName());
-            Integer parentId = tree.getParentId(newCategory.getPk());
-            if (parentId != null) {
-                System.out.println("상위 카테고리: " + tree.getCategoryName(parentId) + " (ID: " + parentId + ")");
-            }
+        } catch (NumberFormatException e) {
+            System.out.println("올바른 카테고리 ID를 입력해주세요.");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void addBoard() {
+        System.out.println("\n=== 게시판 추가 ===");
+        
+        try {
+            System.out.println("카테고리 ID를 입력하세요:");
+            int categoryId = Integer.parseInt(scanner.nextLine().trim());
+            
+            System.out.println("게시판 이름을 입력하세요:");
+            String boardName = scanner.nextLine().trim();
+            
+            tree.createAndAssignBoard(boardName, categoryId);
+            
+        } catch (NumberFormatException e) {
+            System.out.println("올바른 카테고리 ID를 입력해주세요.");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void deleteBoard() {
+        System.out.println("\n=== 게시판 삭제 ===");
+        
+        try {
+            System.out.println("카테고리 ID를 입력하세요:");
+            int categoryId = Integer.parseInt(scanner.nextLine().trim());
+            
+            tree.deleteBoard(categoryId);
             
         } catch (NumberFormatException e) {
             System.out.println("올바른 카테고리 ID를 입력해주세요.");
