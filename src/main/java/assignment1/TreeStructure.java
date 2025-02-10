@@ -137,6 +137,28 @@ public class TreeStructure {
         categoryToBoardMap.remove(categoryId);
     }
 
+    public void deleteCategory(Integer categoryId) {
+        validateDeletableCategory(categoryId);
+
+        edges.removeIf(edge -> edge.cid.equals(categoryId));
+        
+        Category category = categoryPkMap.get(categoryId);
+        categoryNameMap.remove(category.getName() + "_" + categoryId);
+        categoryPkMap.remove(categoryId);
+    }
+
+    private void validateDeletableCategory(Integer categoryId) {
+        validateCategoryExists(categoryId);
+        
+        if (categoryToBoardMapContainsKey(categoryId)) {
+            throw new IllegalArgumentException("게시판이 존재하는 카테고리는 삭제할 수 없습니다.");
+        }
+        
+        if (!isLeafCategory(categoryId)) {
+            throw new IllegalArgumentException("하위 카테고리가 있는 카테고리는 삭제할 수 없습니다.");
+        }
+    }
+
     private void validateCategoryExists(Integer categoryId) {
         if (!categoryPkMapContainsKey(categoryId)) {
             throw new IllegalArgumentException("존재하지 않는 카테고리입니다.");

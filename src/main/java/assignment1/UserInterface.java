@@ -19,6 +19,7 @@ public class UserInterface {
                 }
             } catch (Exception e) {
                 System.out.println("오류가 발생했습니다: " + e.getMessage());
+                e.printStackTrace();
                 scanner.nextLine(); // 버퍼 비우기
             }
         }
@@ -28,46 +29,29 @@ public class UserInterface {
     }
 
     private boolean processOneIteration() {
-        displayMainMenu();
-        int command = getCommand();
-        
-        switch (command) {
-            case 1:
-                searchCategory();
-                return true;
-            case 2:
-                addCategory();
-                return true;
-            case 3:
-                addBoard();
-                return true;
-            case 4:
-                deleteBoard();
-                return true;
-            case 5:
-                return false;
-            default:
-                System.out.println("잘못된 명령입니다.");
-                return true;
-        }
-    }
-
-    private void displayMainMenu() {
-        System.out.println("\n=== 카테고리 관리 시스템 ===");
+        System.out.println("\n=== 메뉴 ===");
         System.out.println("1. 카테고리 검색");
         System.out.println("2. 카테고리 추가");
-        System.out.println("3. 게시판 추가");
-        System.out.println("4. 게시판 삭제");
-        System.out.println("5. 종료");
-        System.out.print("명령을 입력하세요: ");
+        System.out.println("3. 카테고리 삭제");
+        System.out.println("4. 게시판 추가");
+        System.out.println("5. 게시판 삭제");
+        System.out.println("0. 종료");
+        
+        String input = scanner.nextLine().trim();
+        
+        switch (input) {
+            case "1": searchCategory(); break;
+            case "2": addCategory(); break;
+            case "3": deleteCategory(); break;
+            case "4": addBoard(); break;
+            case "5": deleteBoard(); break;
+            case "0": return false;
+            default: System.out.println("잘못된 입력입니다.");
+        }
+        
+        return true;
     }
 
-    private int getCommand() {
-        int command = scanner.nextInt();
-        scanner.nextLine(); // 버퍼 비우기
-        return command;
-    }
-    
     private void searchCategory() {
         List<Integer> searchResults = getSearchResults();
         if (searchResults.isEmpty()) {
@@ -119,6 +103,23 @@ public class UserInterface {
                 tree.addNewCategory(Integer.parseInt(parentIdInput), categoryName);
             }
             
+        } catch (NumberFormatException e) {
+            System.out.println("올바른 카테고리 ID를 입력해주세요.");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void deleteCategory() {
+        System.out.println("\n=== 카테고리 삭제 ===");
+
+        try {
+            System.out.println("삭제할 카테고리 ID를 입력하세요:");
+            int categoryId = Integer.parseInt(scanner.nextLine().trim());
+
+            tree.deleteCategory(categoryId);
+            System.out.println("카테고리가 삭제되었습니다.");
+
         } catch (NumberFormatException e) {
             System.out.println("올바른 카테고리 ID를 입력해주세요.");
         } catch (IllegalArgumentException e) {
