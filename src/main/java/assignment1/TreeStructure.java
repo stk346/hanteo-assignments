@@ -83,16 +83,12 @@ public class TreeStructure {
         }
     }
 
-    public Category getCategoryPkMap(Integer nodeId) {
-        return categoryPkMap.get(nodeId);
-    }
-
     public boolean categoryToBoardMapContainsKey(Integer nodeId) {
         return categoryToBoardMap.containsKey(nodeId);
     }
 
     public Board getBoard(Integer boardPk) {
-        return  boards.get(boardPk);
+        return boards.get(boardPk);
     }
 
     public Integer getBoardPk(Integer nodeId) {
@@ -105,5 +101,31 @@ public class TreeStructure {
 
     public String getCategoryName(Integer nodeId) {
         return categoryPkMap.get(nodeId).getName();
+    }
+
+    public boolean isLeafCategory(Integer categoryId) {
+        return getChildren(categoryId).isEmpty();
+    }
+
+    public Board createAndAssignBoard(String boardName, Integer categoryId) {
+        if (!isLeafCategory(categoryId)) {
+            throw new IllegalArgumentException("게시판은 말단 카테고리에만 추가할 수 있습니다.");
+        }
+        
+        Board board = addNewBoard(boardName);
+        assignBoardToCategory(categoryId, board.getPk());
+        return board;
+    }
+
+    public void assignExistingBoard(Integer categoryId, Integer boardPk) {
+        if (!isLeafCategory(categoryId)) {
+            throw new IllegalArgumentException("게시판은 말단 카테고리에만 추가할 수 있습니다.");
+        }
+        
+        if (boardPk > boards.size() || boardPk < 1) {
+            throw new IllegalArgumentException("존재하지 않는 게시판입니다: " + boardPk);
+        }
+        
+        categoryToBoardMap.put(categoryId, boardPk);
     }
 }
