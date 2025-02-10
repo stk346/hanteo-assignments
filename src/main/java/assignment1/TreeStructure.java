@@ -14,7 +14,7 @@ public class TreeStructure {
 
     public Category addNewCategory(Integer parentId, String name) {
         Category category = new Category(name);
-        categoryNameMap.put(name + "_" + category.getPk(), category);
+        categoryNameMap.put(String.format("%s_%d", name, category.getPk()), category);
         categoryPkMap.put(category.getPk(), category);
 
         if (parentId != null) {
@@ -32,10 +32,10 @@ public class TreeStructure {
 
     public void assignBoardToCategory(int categoryPk, int boardPk) {
         if (!categoryPkMap.containsKey(categoryPk)) {
-            throw new IllegalArgumentException("카테고리가 존재하지 않습니다: " + categoryPk);
+            throw new IllegalArgumentException(String.format("카테고리가 존재하지 않습니다: %d", categoryPk));
         }
         if (boardPk > boards.size() || boardPk < 1) {
-            throw new IllegalArgumentException("게시판이 존재하지 않습니다: " + boardPk);
+            throw new IllegalArgumentException(String.format("게시판이 존재하지 않습니다: %d", boardPk));
         }
         categoryToBoardMap.put(categoryPk, boardPk);
     }
@@ -143,7 +143,7 @@ public class TreeStructure {
         edges.removeIf(edge -> edge.cid.equals(categoryId));
         
         Category category = categoryPkMap.get(categoryId);
-        categoryNameMap.remove(category.getName() + "_" + categoryId);
+        categoryNameMap.remove(String.format("%s_%d", category.getName(), categoryId));
         categoryPkMap.remove(categoryId);
     }
 
@@ -161,7 +161,7 @@ public class TreeStructure {
 
     private void validateCategoryExists(Integer categoryId) {
         if (!categoryPkMapContainsKey(categoryId)) {
-            throw new IllegalArgumentException("존재하지 않는 카테고리입니다.");
+            throw new IllegalArgumentException(String.format("카테고리가 존재하지 않습니다: %d", categoryId));
         }
     }
 
